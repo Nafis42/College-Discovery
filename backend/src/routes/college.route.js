@@ -4,7 +4,16 @@ import { getColleges, getCollegeById , compareColleges} from "../controllers/col
 const router = express.Router();
 
 router.get("/", getColleges);
-router.get("/:id", getCollegeById);
-router.get("/compare/list", compareColleges);
+// router.get("/:id", getCollegeById);
+// router.get("/compare/list", compareColleges);
+router.get(
+    "/compare/list",
+    compareColleges
+  );
+  
+  router.get(
+    "/:id",
+    getCollegeById
+  );
 
 export default router;
