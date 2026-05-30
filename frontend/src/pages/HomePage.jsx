@@ -3,20 +3,34 @@ import { Link } from "react-router-dom";
 
 import Navbar from "../components/common/Navbar";
 import Hero from "../components/common/Hero";
+import Footer from "../components/common/Footer";
 
 import SearchBar from "../components/colleges/SearchBar";
 import CollegeCard from "../components/colleges/CollegeCard";
 import FilterBar from "../components/colleges/FilterBar";
+import SkeletonCard from "../components/common/SkeletonCard";
 
 import Pagination from "../components/common/Pagination";
 
-import { getColleges } from "../api/college.api";
+import {
+  getColleges,
+  getCollegeMeta,
+} from "../api/college.api";
 
 import useCollegeStore from "../store/useCollegeStore";
 
 const HomePage = () => {
   const [colleges, setColleges] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const [totalPages, setTotalPages] =
+    useState(1);
+
+  const [locations, setLocations] =
+    useState([]);
+
+  const [types, setTypes] =
+    useState([]);
 
   const {
     search,
@@ -33,6 +47,7 @@ const HomePage = () => {
     setPage,
   } = useCollegeStore();
 
+  // Fetch colleges
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -47,7 +62,13 @@ const HomePage = () => {
           limit: 9,
         });
 
-        setColleges(response.data.colleges);
+        setColleges(
+          response.data.colleges
+        );
+
+        setTotalPages(
+          response.data.totalPages
+        );
       } catch (error) {
         console.error(error);
       } finally {
@@ -63,6 +84,28 @@ const HomePage = () => {
     sortBy,
     page,
   ]);
+
+  // Fetch filter metadata
+  useEffect(() => {
+    const fetchMeta = async () => {
+      try {
+        const response =
+          await getCollegeMeta();
+
+        setLocations(
+          response.data.locations
+        );
+
+        setTypes(
+          response.data.types
+        );
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchMeta();
+  }, []);
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -85,6 +128,8 @@ const HomePage = () => {
           setType={setType}
           sortBy={sortBy}
           setSortBy={setSortBy}
+          locations={locations}
+          types={types}
         />
 
         {compareIds.length >= 2 && (
@@ -96,7 +141,8 @@ const HomePage = () => {
                 </h3>
 
                 <p className="text-sm text-slate-300">
-                  {compareIds.length} colleges selected
+                  {compareIds.length} colleges
+                  selected
                 </p>
               </div>
 
@@ -110,13 +156,21 @@ const HomePage = () => {
           </div>
         )}
 
-        {loading ? (
-          <div className="py-20 text-center">
-            <p className="text-lg text-slate-500">
-              Loading colleges...
-            </p>
-          </div>
-        ) : colleges.length === 0 ? (
+{loading ? (
+  <>
+    <div className="mb-4">
+      <p className="text-sm text-slate-500">
+        Loading colleges...
+      </p>
+    </div>
+
+    <div className="grid gap-6 pb-8 md:grid-cols-2 lg:grid-cols-3">
+      {[...Array(6)].map((_, index) => (
+        <SkeletonCard key={index} />
+      ))}
+    </div>
+  </>
+) : colleges.length === 0 ? (
           <div className="py-20 text-center">
             <h2 className="text-xl font-semibold">
               No colleges found
@@ -135,7 +189,8 @@ const HomePage = () => {
 
               {compareIds.length > 0 && (
                 <p className="text-sm font-medium text-slate-700">
-                  {compareIds.length} selected for comparison
+                  {compareIds.length} selected
+                  for comparison
                 </p>
               )}
             </div>
@@ -151,11 +206,13 @@ const HomePage = () => {
 
             <Pagination
               page={page}
+              totalPages={totalPages}
               setPage={setPage}
             />
           </>
         )}
       </div>
+      <Footer/>
     </div>
   );
 };

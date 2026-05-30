@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import Navbar from "../components/common/Navbar";
-
+import Footer from "../components/common/Footer";
 import StatsCard from "../components/colleges/StatsCard";
 
 import CoursesTable from "../components/colleges/CoursesTable";
@@ -58,8 +58,29 @@ const CollegeDetailsPage = () => {
 
   if (loading) {
     return (
-      <div className="p-10">
-        Loading...
+      <div className="min-h-screen bg-slate-50">
+        <Navbar />
+  
+        <div className="mx-auto max-w-7xl px-6 py-10">
+          <div className="animate-pulse rounded-3xl bg-white p-8 shadow-sm">
+            <div className="h-6 w-24 rounded bg-slate-200"></div>
+  
+            <div className="mt-4 h-10 w-72 rounded bg-slate-200"></div>
+  
+            <div className="mt-4 h-4 w-40 rounded bg-slate-200"></div>
+  
+            <div className="mt-6 h-20 rounded bg-slate-200"></div>
+          </div>
+  
+          <div className="mt-8 grid gap-6 md:grid-cols-4">
+            {[...Array(4)].map((_, index) => (
+              <div
+                key={index}
+                className="h-28 animate-pulse rounded-2xl bg-white shadow-sm"
+              />
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
@@ -140,6 +161,7 @@ const CollegeDetailsPage = () => {
           </div>
         </section>
       </div>
+      <Footer/>
     </div>
   );
 };

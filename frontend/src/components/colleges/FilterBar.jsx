@@ -5,6 +5,8 @@ const FilterBar = ({
     setType,
     sortBy,
     setSortBy,
+    locations,
+    types,
   }) => {
     return (
       <div className="mb-8 grid gap-4 md:grid-cols-3">
@@ -19,25 +21,14 @@ const FilterBar = ({
             All Locations
           </option>
   
-          <option value="Delhi">
-            Delhi
-          </option>
-  
-          <option value="Mumbai">
-            Mumbai
-          </option>
-  
-          <option value="Hyderabad">
-            Hyderabad
-          </option>
-  
-          <option value="Chennai">
-            Chennai
-          </option>
-  
-          <option value="Kolkata">
-            Kolkata
-          </option>
+          {locations.map((location) => (
+    <option
+      key={location}
+      value={location}
+    >
+      {location}
+    </option>
+  ))}
         </select>
   
         <select
@@ -51,25 +42,14 @@ const FilterBar = ({
             All Types
           </option>
   
-          <option value="IIT">
-            IIT
-          </option>
-  
-          <option value="NIT">
-            NIT
-          </option>
-  
-          <option value="IIIT">
-            IIIT
-          </option>
-  
-          <option value="Private">
-            Private
-          </option>
-  
-          <option value="University">
-            University
-          </option>
+          {types.map((type) => (
+    <option
+      key={type}
+      value={type}
+    >
+      {type}
+    </option>
+  ))}
         </select>
   
         <select

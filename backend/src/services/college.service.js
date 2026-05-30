@@ -16,8 +16,7 @@ export const fetchColleges = async (query) => {
 
   const offset = (page - 1) * limit;
 
-  let sql = `
-    SELECT *
+  let baseQuery = `
     FROM colleges
     WHERE 1=1
   `;
@@ -25,9 +24,9 @@ export const fetchColleges = async (query) => {
   const values = [];
   let index = 1;
 
-  // Search by college name
+  // Search
   if (search) {
-    sql += `
+    baseQuery += `
       AND LOWER(name)
       LIKE LOWER($${index})
     `;
@@ -36,9 +35,9 @@ export const fetchColleges = async (query) => {
     index++;
   }
 
-  // Filter by location
+  // Location Filter
   if (location) {
-    sql += `
+    baseQuery += `
       AND location = $${index}
     `;
 
@@ -46,15 +45,33 @@ export const fetchColleges = async (query) => {
     index++;
   }
 
-  // Filter by college type
+  // College Type Filter
   if (type) {
-    sql += `
+    baseQuery += `
       AND college_type = $${index}
     `;
 
     values.push(type);
     index++;
   }
+
+  // Total Count Query
+  const countResult = await pool.query(
+    `
+    SELECT COUNT(*) ${baseQuery}
+    `,
+    values
+  );
+
+  const total = Number(
+    countResult.rows[0].count
+  );
+
+  // Main Data Query
+  let dataQuery = `
+    SELECT *
+    ${baseQuery}
+  `;
 
   // Sorting
   const allowedSortFields = [
@@ -64,37 +81,53 @@ export const fetchColleges = async (query) => {
     "placement_percentage",
   ];
 
-  if (sortBy && allowedSortFields.includes(sortBy)) {
-    sql += `
+  if (
+    sortBy &&
+    allowedSortFields.includes(sortBy)
+  ) {
+    dataQuery += `
       ORDER BY ${sortBy}
       ${order === "asc" ? "ASC" : "DESC"}
     `;
   } else {
-    sql += `
+    dataQuery += `
       ORDER BY rating DESC
     `;
   }
 
   // Pagination
-  sql += `
+  dataQuery += `
     LIMIT $${index}
     OFFSET $${index + 1}
   `;
 
-  values.push(limit);
-  values.push(offset);
+  const dataValues = [
+    ...values,
+    limit,
+    offset,
+  ];
 
-  const result = await pool.query(sql, values);
+  const result = await pool.query(
+    dataQuery,
+    dataValues
+  );
 
   return {
     page,
     limit,
-    count: result.rowCount,
+    total,
+
+    totalPages: Math.ceil(
+      total / limit
+    ),
+
     colleges: result.rows,
   };
 };
 
-export const fetchCollegeById = async (id) => {
+export const fetchCollegeById = async (
+  id
+) => {
   const collegeResult = await pool.query(
     `
     SELECT *
@@ -135,17 +168,45 @@ export const fetchCollegeById = async (id) => {
   };
 };
 
-export const compareCollegesService = async (
-  ids
-) => {
-  const result = await pool.query(
-    `
-    SELECT *
-    FROM colleges
-    WHERE id = ANY($1)
-    `,
-    [ids]
-  );
+export const compareCollegesService =
+  async (ids) => {
+    const result = await pool.query(
+      `
+      SELECT *
+      FROM colleges
+      WHERE id = ANY($1)
+      `,
+      [ids]
+    );
 
-  return result.rows;
-};
+    return result.rows;
+  };
+
+  export const fetchCollegeMeta =
+  async () => {
+    const locationsResult =
+      await pool.query(`
+      SELECT DISTINCT location
+      FROM colleges
+      ORDER BY location
+    `);
+
+    const typesResult =
+      await pool.query(`
+      SELECT DISTINCT college_type
+      FROM colleges
+      ORDER BY college_type
+    `);
+
+    return {
+      locations:
+        locationsResult.rows.map(
+          (item) => item.location
+        ),
+
+      types:
+        typesResult.rows.map(
+          (item) => item.college_type
+        ),
+    };
+  };  

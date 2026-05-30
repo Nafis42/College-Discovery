@@ -1,5 +1,5 @@
 import express from "express";
-import { getColleges, getCollegeById , compareColleges} from "../controllers/college.controller.js";
+import { getColleges, getCollegeById , compareColleges, getCollegeMeta} from "../controllers/college.controller.js";
 
 const router = express.Router();
 
@@ -10,10 +10,10 @@ router.get(
     "/compare/list",
     compareColleges
   );
-  
+  router.get("/meta", getCollegeMeta);  
   router.get(
     "/:id",
     getCollegeById
   );
-
+// router.get("/meta", getCollegeMeta);
 export default router;

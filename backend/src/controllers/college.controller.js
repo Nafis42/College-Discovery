@@ -1,4 +1,4 @@
-import { fetchColleges,fetchCollegeById,compareCollegesService } from "../services/college.service.js";
+import { fetchColleges,fetchCollegeById,compareCollegesService,fetchCollegeMeta } from "../services/college.service.js";
 // import { fetchColleges } from "../services/college.service.js";
 
 export const getColleges = async (req, res) => {
@@ -70,3 +70,26 @@ if (!data) {
       });
     }
   };
+
+  export const getCollegeMeta = async (
+    req,
+    res
+  ) => {
+    try {
+      const data =
+        await fetchCollegeMeta();
+  
+      res.status(200).json({
+        success: true,
+        ...data,
+      });
+    } catch (error) {
+      console.error(error);
+  
+      res.status(500).json({
+        success: false,
+        message:
+          "Failed to fetch metadata",
+      });
+    }
+  };  

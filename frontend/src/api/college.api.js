@@ -17,3 +17,7 @@ export const compareColleges = (
       )}`
     );
   };
+
+  export const getCollegeMeta = () => {
+    return api.get("/colleges/meta");
+  };  
