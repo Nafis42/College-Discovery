@@ -1,37 +1,104 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import {
+  Link,
+  useNavigate,
+} from "react-router-dom";
 
 import Navbar from "../components/common/Navbar";
 import Footer from "../components/common/Footer";
 
 import { compareColleges } from "../api/college.api";
+import { saveComparison } from "../api/comparison.api";
 
 import useCollegeStore from "../store/useCollegeStore";
+import useAuthStore from "../store/useAuthStore";
 
 const ComparePage = () => {
-  const { compareIds } = useCollegeStore();
+  const navigate = useNavigate();
 
-  const [colleges, setColleges] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { compareIds } =
+    useCollegeStore();
 
-  useEffect(() => {
-    const fetchComparedColleges = async () => {
+  const { token } =
+    useAuthStore();
+
+  const [colleges, setColleges] =
+    useState([]);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [
+    comparisonName,
+    setComparisonName,
+  ] = useState("");
+
+  const [saving, setSaving] =
+    useState(false);
+
+  const handleSaveComparison =
+    async () => {
       try {
-        if (compareIds.length < 2) {
-          setLoading(false);
+        if (!token) {
+          navigate("/login");
           return;
         }
 
-        const response =
-          await compareColleges(compareIds);
+        if (
+          !comparisonName.trim()
+        ) {
+          alert(
+            "Please enter a comparison name"
+          );
 
-        setColleges(response.data.colleges);
+          return;
+        }
+
+        setSaving(true);
+
+        await saveComparison({
+          name: comparisonName,
+          collegeIds:
+            compareIds,
+        });
+
+        alert(
+          "Comparison saved successfully"
+        );
+
+        setComparisonName("");
       } catch (error) {
         console.error(error);
       } finally {
-        setLoading(false);
+        setSaving(false);
       }
     };
+
+  useEffect(() => {
+    const fetchComparedColleges =
+      async () => {
+        try {
+          if (
+            compareIds.length < 2
+          ) {
+            setLoading(false);
+            return;
+          }
+
+          const response =
+            await compareColleges(
+              compareIds
+            );
+
+          setColleges(
+            response.data.colleges
+          );
+        } catch (error) {
+          console.error(error);
+        } finally {
+          setLoading(false);
+        }
+      };
 
     fetchComparedColleges();
   }, [compareIds]);
@@ -59,7 +126,8 @@ const ComparePage = () => {
           </h1>
 
           <p className="mt-4 text-slate-500">
-            Select at least 2 colleges to compare.
+            Select at least 2
+            colleges to compare.
           </p>
 
           <Link
@@ -82,6 +150,38 @@ const ComparePage = () => {
           College Comparison
         </h1>
 
+        <div className="mb-8 rounded-2xl bg-white p-5 shadow-sm">
+          <h3 className="mb-3 text-lg font-semibold">
+            Save This Comparison
+          </h3>
+
+          <div className="flex flex-col gap-3 md:flex-row">
+            <input
+              type="text"
+              placeholder="Dream IITs"
+              value={comparisonName}
+              onChange={(e) =>
+                setComparisonName(
+                  e.target.value
+                )
+              }
+              className="flex-1 rounded-xl border p-3"
+            />
+
+            <button
+              onClick={
+                handleSaveComparison
+              }
+              disabled={saving}
+              className="rounded-xl bg-slate-900 px-5 py-3 text-white transition hover:bg-slate-800"
+            >
+              {saving
+                ? "Saving..."
+                : "Save Comparison"}
+            </button>
+          </div>
+        </div>
+
         <div className="overflow-x-auto rounded-2xl border bg-white shadow-sm">
           <table className="w-full">
             <thead>
@@ -90,14 +190,20 @@ const ComparePage = () => {
                   Metric
                 </th>
 
-                {colleges.map((college) => (
-                  <th
-                    key={college.id}
-                    className="p-4 text-left"
-                  >
-                    {college.name}
-                  </th>
-                ))}
+                {colleges.map(
+                  (college) => (
+                    <th
+                      key={
+                        college.id
+                      }
+                      className="p-4 text-left"
+                    >
+                      {
+                        college.name
+                      }
+                    </th>
+                  )
+                )}
               </tr>
             </thead>
 
@@ -107,14 +213,20 @@ const ComparePage = () => {
                   Location
                 </td>
 
-                {colleges.map((college) => (
-                  <td
-                    key={college.id}
-                    className="p-4"
-                  >
-                    {college.location}
-                  </td>
-                ))}
+                {colleges.map(
+                  (college) => (
+                    <td
+                      key={
+                        college.id
+                      }
+                      className="p-4"
+                    >
+                      {
+                        college.location
+                      }
+                    </td>
+                  )
+                )}
               </tr>
 
               <tr className="border-b">
@@ -122,14 +234,20 @@ const ComparePage = () => {
                   Type
                 </td>
 
-                {colleges.map((college) => (
-                  <td
-                    key={college.id}
-                    className="p-4"
-                  >
-                    {college.college_type}
-                  </td>
-                ))}
+                {colleges.map(
+                  (college) => (
+                    <td
+                      key={
+                        college.id
+                      }
+                      className="p-4"
+                    >
+                      {
+                        college.college_type
+                      }
+                    </td>
+                  )
+                )}
               </tr>
 
               <tr className="border-b">
@@ -137,14 +255,21 @@ const ComparePage = () => {
                   Rating
                 </td>
 
-                {colleges.map((college) => (
-                  <td
-                    key={college.id}
-                    className="p-4"
-                  >
-                    ⭐ {college.rating}
-                  </td>
-                ))}
+                {colleges.map(
+                  (college) => (
+                    <td
+                      key={
+                        college.id
+                      }
+                      className="p-4"
+                    >
+                      ⭐{" "}
+                      {
+                        college.rating
+                      }
+                    </td>
+                  )
+                )}
               </tr>
 
               <tr className="border-b">
@@ -152,14 +277,21 @@ const ComparePage = () => {
                   Placement %
                 </td>
 
-                {colleges.map((college) => (
-                  <td
-                    key={college.id}
-                    className="p-4"
-                  >
-                    {college.placement_percentage}%
-                  </td>
-                ))}
+                {colleges.map(
+                  (college) => (
+                    <td
+                      key={
+                        college.id
+                      }
+                      className="p-4"
+                    >
+                      {
+                        college.placement_percentage
+                      }
+                      %
+                    </td>
+                  )
+                )}
               </tr>
 
               <tr className="border-b">
@@ -167,19 +299,25 @@ const ComparePage = () => {
                   Median Package
                 </td>
 
-                {colleges.map((college) => (
-                  <td
-                    key={college.id}
-                    className="p-4"
-                  >
-                    ₹
-                    {(
-                      college.median_package /
-                      100000
-                    ).toFixed(1)}
-                    L
-                  </td>
-                ))}
+                {colleges.map(
+                  (college) => (
+                    <td
+                      key={
+                        college.id
+                      }
+                      className="p-4"
+                    >
+                      ₹
+                      {(
+                        college.median_package /
+                        100000
+                      ).toFixed(
+                        1
+                      )}
+                      L
+                    </td>
+                  )
+                )}
               </tr>
 
               <tr className="border-b">
@@ -187,19 +325,25 @@ const ComparePage = () => {
                   Highest Package
                 </td>
 
-                {colleges.map((college) => (
-                  <td
-                    key={college.id}
-                    className="p-4"
-                  >
-                    ₹
-                    {(
-                      college.highest_package /
-                      100000
-                    ).toFixed(1)}
-                    L
-                  </td>
-                ))}
+                {colleges.map(
+                  (college) => (
+                    <td
+                      key={
+                        college.id
+                      }
+                      className="p-4"
+                    >
+                      ₹
+                      {(
+                        college.highest_package /
+                        100000
+                      ).toFixed(
+                        1
+                      )}
+                      L
+                    </td>
+                  )
+                )}
               </tr>
 
               <tr>
@@ -207,24 +351,32 @@ const ComparePage = () => {
                   Fees
                 </td>
 
-                {colleges.map((college) => (
-                  <td
-                    key={college.id}
-                    className="p-4"
-                  >
-                    ₹
-                    {(
-                      college.fees / 100000
-                    ).toFixed(1)}
-                    L
-                  </td>
-                ))}
+                {colleges.map(
+                  (college) => (
+                    <td
+                      key={
+                        college.id
+                      }
+                      className="p-4"
+                    >
+                      ₹
+                      {(
+                        college.fees /
+                        100000
+                      ).toFixed(
+                        1
+                      )}
+                      L
+                    </td>
+                  )
+                )}
               </tr>
             </tbody>
           </table>
         </div>
       </div>
-      <Footer/>
+
+      <Footer />
     </div>
   );
 };

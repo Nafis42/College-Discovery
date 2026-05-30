@@ -1,8 +1,10 @@
 import { useEffect } from "react";
 
 import { getMe } from "../../api/auth.api";
+import { getSavedColleges } from "../../api/saved.api";
 
 import useAuthStore from "../../store/useAuthStore";
+import useSavedStore from "../../store/useSavedStore";
 
 const AuthInitializer = () => {
   const {
@@ -11,26 +13,45 @@ const AuthInitializer = () => {
     logout,
   } = useAuthStore();
 
+  const { setSavedIds } =
+    useSavedStore();
+
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        if (!token) return;
+    const initializeAuth =
+      async () => {
+        try {
+          if (!token) return;
 
-        const response =
-          await getMe();
+          const userResponse =
+            await getMe();
 
-        setUser(
-          response.data.user
-        );
-      } catch (error) {
-        console.error(error);
+          setUser(
+            userResponse.data.user
+          );
 
-        logout();
-      }
-    };
+          const savedResponse =
+            await getSavedColleges();
 
-    fetchUser();
-  }, [token]);
+          setSavedIds(
+            savedResponse.data.colleges.map(
+              (college) =>
+                college.id
+            )
+          );
+        } catch (error) {
+          console.error(error);
+
+          logout();
+        }
+      };
+
+    initializeAuth();
+  }, [
+    token,
+    setUser,
+    logout,
+    setSavedIds,
+  ]);
 
   return null;
 };

@@ -6,6 +6,8 @@ import ComparePage from "../pages/ComparePage.jsx";
 
 import LoginPage from "../pages/LoginPage.jsx";
 import RegisterPage from "../pages/RegisterPage.jsx";
+import SavedCollegesPage from "../pages/SavedCollegesPage.jsx";
+import MyComparisonsPage from "../pages/MyComparisonsPage.jsx";
 
 const AppRoutes = () => {
   return (
@@ -34,7 +36,18 @@ const AppRoutes = () => {
         path="/register"
         element={<RegisterPage />}
       />
+      <Route
+  path="/saved"
+  element={<SavedCollegesPage />}
+/>
+<Route
+  path="/my-comparisons"
+  element={
+    <MyComparisonsPage />
+  }
+/>
     </Routes>
+    
   );
 };
 

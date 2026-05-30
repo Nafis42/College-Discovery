@@ -2,7 +2,10 @@ import express from "express";
 import cors from "cors";
 import pool from "./config/db.js";
 import collegeRoutes from "./routes/college.route.js";
-import authRoutes from "./routes/auth.routes.js"
+import authRoutes from "./routes/auth.routes.js";
+import savedRoutes from "./routes/saved.routes.js";
+import comparisonRoutes from "./routes/comparison.routes.js";
+
 
 const app = express();
 
@@ -38,6 +41,15 @@ app.get("/test-db", async (req, res) => {
   app.use(
     "/api/auth",
     authRoutes
+  );
+  app.use(
+    "/api/saved",
+    savedRoutes
+  );
+
+  app.use(
+    "/api/comparisons",
+    comparisonRoutes
   );
 
 export default app;

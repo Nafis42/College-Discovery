@@ -10,28 +10,66 @@ const useCollegeStore = create((set) => ({
   compareIds: [],
 
   setSearch: (search) =>
-    set({ search, page: 1 }),
+    set({
+      search,
+      page: 1,
+    }),
 
   setLocation: (location) =>
-    set({ location, page: 1 }),
+    set({
+      location,
+      page: 1,
+    }),
 
   setType: (type) =>
-    set({ type, page: 1 }),
+    set({
+      type,
+      page: 1,
+    }),
 
   setSortBy: (sortBy) =>
-    set({ sortBy, page: 1 }),
+    set({
+      sortBy,
+      page: 1,
+    }),
 
   setPage: (page) =>
-    set({ page }),
+    set({
+      page,
+    }),
+
+  setCompareIds: (ids) =>
+    set({
+      compareIds: ids,
+    }),
 
   toggleCompare: (id) =>
-    set((state) => ({
-      compareIds: state.compareIds.includes(id)
-        ? state.compareIds.filter(
-            (item) => item !== id
-          )
-        : [...state.compareIds, id],
-    })),
+    set((state) => {
+      // Prevent selecting more than 3 colleges
+      if (
+        !state.compareIds.includes(id) &&
+        state.compareIds.length >= 3
+      ) {
+        return state;
+      }
+
+      return {
+        compareIds:
+          state.compareIds.includes(id)
+            ? state.compareIds.filter(
+                (item) => item !== id
+              )
+            : [
+                ...state.compareIds,
+                id,
+              ],
+      };
+    }),
+
+  clearCompare: () =>
+    set({
+      compareIds: [],
+    }),
 }));
 
 export default useCollegeStore;

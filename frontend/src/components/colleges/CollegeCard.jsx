@@ -1,11 +1,72 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+
 import useCollegeStore from "../../store/useCollegeStore";
+import useAuthStore from "../../store/useAuthStore";
+import useSavedStore from "../../store/useSavedStore";
+
+import {
+  saveCollege,
+  removeSavedCollege,
+} from "../../api/saved.api";
 
 const CollegeCard = ({ college }) => {
+  const navigate = useNavigate();
+
   const {
     compareIds,
     toggleCompare,
   } = useCollegeStore();
+
+  const { token } = useAuthStore();
+
+  const {
+    savedIds,
+    addSavedCollege,
+    removeSavedCollege: removeFromStore,
+  } = useSavedStore();
+
+  const isSaved = savedIds.includes(
+    college.id
+  );
+
+  const handleSave = async (
+    e
+  ) => {
+    e.preventDefault();
+
+    try {
+      if (!token) {
+        navigate("/login");
+        return;
+      }
+
+      if (isSaved) {
+        await removeSavedCollege(
+          college.id
+        );
+
+        removeFromStore(
+          college.id
+        );
+      } else {
+        await saveCollege(
+          college.id
+        );
+
+        addSavedCollege(
+          college.id
+        );
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleCompare = (e) => {
+    e.preventDefault();
+
+    toggleCompare(college.id);
+  };
 
   return (
     <div
@@ -75,7 +136,9 @@ const CollegeCard = ({ college }) => {
 
             <span className="font-semibold">
               ₹
-              {(college.fees / 100000).toFixed(1)}
+              {(college.fees / 100000).toFixed(
+                1
+              )}
               L
             </span>
           </div>
@@ -87,9 +150,7 @@ const CollegeCard = ({ college }) => {
       </Link>
 
       <button
-        onClick={() =>
-          toggleCompare(college.id)
-        }
+        onClick={handleCompare}
         className={`
           mt-4
           w-full
@@ -100,15 +161,42 @@ const CollegeCard = ({ college }) => {
           transition
 
           ${
-            compareIds.includes(college.id)
+            compareIds.includes(
+              college.id
+            )
               ? "bg-slate-900 text-white"
               : "border border-slate-300 hover:bg-slate-100"
           }
         `}
       >
-        {compareIds.includes(college.id)
+        {compareIds.includes(
+          college.id
+        )
           ? "Selected for Compare"
           : "Compare"}
+      </button>
+
+      <button
+        onClick={handleSave}
+        className={`
+          mt-3
+          w-full
+          rounded-xl
+          py-2
+          text-sm
+          font-medium
+          transition
+
+          ${
+            isSaved
+              ? "bg-emerald-600 text-white hover:bg-emerald-700"
+              : "border border-slate-300 hover:bg-slate-100"
+          }
+        `}
+      >
+        {isSaved
+          ? "Saved ✓"
+          : "Save College"}
       </button>
     </div>
   );
